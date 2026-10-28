@@ -2,7 +2,7 @@
 <html lang="id" data-theme="light">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Hasil Belajar</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri&display=swap" rel="stylesheet">
 
@@ -16,10 +16,11 @@
     --particle: rgba(120,80,0,0.45);
     --sumber-bg: rgba(0,0,0,0.10);
     --sumber-text: #4a3200;
-    --nahw-bg: rgba(255,255,255,0.45);
+    --syair-bg: rgba(255,255,255,0.45);
     --hover-bg: rgba(255,255,255,0.35);
     --line: #1a1a1a;
     --btn-bg: rgba(255,255,255,0.6);
+    --nav-bg: rgba(255,230,120,0.85);
 }
 [data-theme="dark"] {
     --bg1: #14110a;
@@ -30,15 +31,16 @@
     --particle: rgba(255,215,0,0.45);
     --sumber-bg: rgba(255,215,0,0.12);
     --sumber-text: #ffd84d;
-    --nahw-bg: rgba(255,215,0,0.08);
+    --syair-bg: rgba(255,215,0,0.08);
     --hover-bg: rgba(255,215,0,0.10);
     --line: #ffd84d;
     --btn-bg: rgba(255,215,0,0.18);
+    --nav-bg: rgba(20,17,10,0.88);
 }
 
 body {
     margin: 0;
-    padding: 40px 20px;
+    padding: 40px 20px 110px;
     font-family: "Times New Roman", serif;
     background: linear-gradient(120deg, var(--bg1), var(--bg2), var(--bg1));
     background-size: 200% 200%;
@@ -53,6 +55,7 @@ body {
     margin: auto;
     position: relative;
     z-index: 1;
+    touch-action: pan-y;
 }
 
 /* Tombol mode gelap */
@@ -102,17 +105,22 @@ body {
 }
 .judul.show { opacity: 1; transform: translateY(0); }
 
-/* Kartu per pelajaran */
+/* Kartu: satu pelajaran per layar */
 .kartu {
+    display: none;
     background: var(--card);
     border: 1px solid var(--card-border);
     border-radius: 18px;
     padding: 22px 20px 12px;
-    margin-bottom: 28px;
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
     box-shadow: 0 8px 24px rgba(0,0,0,0.12);
 }
+.kartu.aktif { display: block; }
+.kartu.dari-kanan { animation: masukKanan 0.4s ease; }
+.kartu.dari-kiri  { animation: masukKiri 0.4s ease; }
+@keyframes masukKanan { from { opacity: 0; transform: translateX(40px); }  to { opacity: 1; transform: none; } }
+@keyframes masukKiri  { from { opacity: 0; transform: translateX(-40px); } to { opacity: 1; transform: none; } }
 
 /* Subjudul */
 .subjudul {
@@ -163,7 +171,6 @@ body {
 }
 .arab:active { transform: scale(0.98); }
 
-/* Baris sumber kitab */
 .arab.sumber {
     background: var(--sumber-bg);
     color: var(--sumber-text);
@@ -174,18 +181,11 @@ body {
     text-align-last: right;
 }
 
-/* Baris contoh (نحو) */
-.arab.nahw {
-    background: var(--nahw-bg);
-    border-right: 3px solid var(--sumber-text);
-}
-
-/* Bait syair */
 .arab.syair {
     text-align: center;
     text-align-last: center;
     font-size: clamp(19px, 4.8vw, 24px);
-    background: var(--nahw-bg);
+    background: var(--syair-bg);
     border: 1px dashed var(--card-border);
 }
 .arab.syair .syatr { display: inline-block; margin: 0 14px; }
@@ -200,6 +200,62 @@ body {
     letter-spacing: 1px;
 }
 
+/* Navigasi bawah */
+#nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
+    background: var(--nav-bg);
+    border-top: 1px solid var(--card-border);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+#nav.siap { display: flex; }
+#nav button.arah {
+    flex: 0 0 auto;
+    min-width: 110px;
+    padding: 10px 14px;
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    background: var(--btn-bg);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+#nav button.arah:disabled { opacity: 0.35; cursor: default; }
+#info {
+    flex: 1 1 auto;
+    text-align: center;
+    max-width: 260px;
+}
+#nomor { font-weight: bold; font-size: 15px; }
+#titik {
+    display: flex;
+    justify-content: center;
+    gap: 7px;
+    margin-top: 6px;
+}
+#titik button {
+    width: 9px;
+    height: 9px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: var(--text);
+    opacity: 0.3;
+    cursor: pointer;
+}
+#titik button.aktif { opacity: 1; transform: scale(1.3); }
+
 .error {
     text-align: center;
     font-size: 18px;
@@ -213,12 +269,16 @@ body {
     100% { background-position: 0% 50%; }
 }
 
-/* Cetak */
+@media (max-width: 480px) {
+    #nav button.arah { min-width: 88px; font-size: 14px; padding: 9px 8px; }
+}
+
+/* Cetak: tampilkan semua pelajaran */
 @media print {
-    body { background: #fff !important; animation: none; color: #000; }
-    .particle, #tema { display: none; }
+    body { background: #fff !important; animation: none; color: #000; padding-bottom: 20px; }
+    .particle, #tema, #nav { display: none !important; }
     .judul, .subjudul, .arab { opacity: 1 !important; transform: none !important; }
-    .kartu { box-shadow: none; backdrop-filter: none; break-inside: avoid; }
+    .kartu { display: block !important; box-shadow: none; backdrop-filter: none; break-inside: avoid; margin-bottom: 20px; animation: none; }
 }
 </style>
 </head>
@@ -238,16 +298,25 @@ body {
 
 <div class="container" id="konten"></div>
 
+<div id="nav">
+    <button class="arah" id="prev">‹ Sebelumnya</button>
+    <div id="info">
+        <div id="nomor"></div>
+        <div id="titik"></div>
+    </div>
+    <button class="arah" id="next">Berikutnya ›</button>
+</div>
+
 <script>
 const JSON_URL = 'data.json';
 
 /* ---------- Mode gelap ---------- */
 const root = document.documentElement;
-const tombol = document.getElementById('tema');
+const tombolTema = document.getElementById('tema');
 
 function setTema(t) {
     root.setAttribute('data-theme', t);
-    tombol.textContent = t === 'dark' ? '☀️' : '🌙';
+    tombolTema.textContent = t === 'dark' ? '☀️' : '🌙';
     try { localStorage.setItem('tema', t); } catch (e) {}
 }
 (function initTema() {
@@ -256,10 +325,10 @@ function setTema(t) {
     if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     setTema(t);
 })();
-tombol.addEventListener('click', () =>
+tombolTema.addEventListener('click', () =>
     setTema(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
 
-/* ---------- Render ---------- */
+/* ---------- Helper & render ---------- */
 function el(tag, className, text) {
     const e = document.createElement(tag);
     e.className = className;
@@ -267,7 +336,6 @@ function el(tag, className, text) {
     return e;
 }
 
-// Bentuk baris Arab sesuai jenisnya (otomatis dari isi teks)
 function barisIsi(teks) {
     if (teks.includes(' * ')) {                       // bait syair: syatr * syatr
         const [a, ...sisa] = teks.split(' * ');
@@ -277,9 +345,12 @@ function barisIsi(teks) {
         row.appendChild(el('span', 'syatr', sisa.join(' * ').trim()));
         return row;
     }
-    const nahw = /^\s*نحو/.test(teks);                // contoh: نحو: ...
-    return el('div', nahw ? 'arab nahw' : 'arab', teks);
+    return el('div', 'arab', teks);
 }
+
+let kartuList = [];
+let titikList = [];
+let sekarang = -1;
 
 function render(data) {
     const box = document.getElementById('konten');
@@ -287,45 +358,104 @@ function render(data) {
 
     if (data.judul) {
         document.title = data.judul;
-        box.appendChild(el('div', 'judul', data.judul));
+        const j = el('div', 'judul', data.judul);
+        box.appendChild(j);
+        requestAnimationFrame(() => j.classList.add('show'));
     }
 
-    (data.bagian || []).forEach(b => {
+    kartuList = (data.bagian || []).map(b => {
         const kartu = el('section', 'kartu');
-
         if (b.subjudul) kartu.appendChild(el('div', 'subjudul', b.subjudul));
-
         if (b.kitab) {
             const row = el('div', 'arab sumber');
             row.appendChild(el('span', 'kitab', b.kitab));
             if (b.sumber) row.appendChild(document.createTextNode(' ' + b.sumber));
             kartu.appendChild(row);
         }
-
         (b.isi || []).forEach(teks => kartu.appendChild(barisIsi(teks)));
         box.appendChild(kartu);
+        return kartu;
     });
 
-    initReveal();
-}
+    if (!kartuList.length) return;
 
-/* ---------- Animasi muncul (jeda tetap & singkat) ---------- */
-function initReveal() {
-    const items = document.querySelectorAll('.judul, .subjudul, .arab');
-    const observer = new IntersectionObserver((entries, obs) => {
-        let n = 0;
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const target = entry.target;
-                setTimeout(() => target.classList.add('show'), n * 100);  // 0,1 dtk antar elemen
-                n++;
-                obs.unobserve(target);
-            }
+    // Titik navigasi (disembunyikan jika pelajaran banyak)
+    const titik = document.getElementById('titik');
+    titik.innerHTML = '';
+    titikList = [];
+    if (kartuList.length <= 10) {
+        kartuList.forEach((_, i) => {
+            const t = document.createElement('button');
+            t.setAttribute('aria-label', 'Pelajaran ' + (i + 1));
+            t.addEventListener('click', () => tampil(i));
+            titik.appendChild(t);
+            titikList.push(t);
         });
-    }, { threshold: 0.15 });
-    items.forEach(i => observer.observe(i));
+    }
+
+    document.getElementById('nav').classList.add('siap');
+
+    // Pelajaran awal: dari #hash, lalu terakhir dibuka, lalu pertama
+    let awal = parseInt(location.hash.replace('#', ''), 10) - 1;
+    if (isNaN(awal)) {
+        try { awal = parseInt(localStorage.getItem('pelajaran'), 10); } catch (e) {}
+    }
+    if (isNaN(awal) || awal < 0 || awal >= kartuList.length) awal = 0;
+    tampil(awal, 0, true);
 }
 
+/* ---------- Tampilkan satu pelajaran ---------- */
+function tampil(i, arah, tanpaScroll) {
+    if (i < 0 || i >= kartuList.length || i === sekarang) return;
+    if (arah === undefined) arah = i > sekarang ? 1 : -1;
+
+    kartuList.forEach(k => k.classList.remove('aktif', 'dari-kanan', 'dari-kiri'));
+    const kartu = kartuList[i];
+    kartu.classList.add('aktif');
+    if (arah !== 0) kartu.classList.add(arah > 0 ? 'dari-kanan' : 'dari-kiri');
+
+    // Muncul berurutan dengan jeda tetap & singkat
+    const items = kartu.querySelectorAll('.subjudul, .arab');
+    items.forEach(it => it.classList.remove('show'));
+    items.forEach((it, n) => setTimeout(() => it.classList.add('show'), 60 + Math.min(n, 12) * 70));
+
+    sekarang = i;
+    document.getElementById('nomor').textContent = (i + 1) + ' / ' + kartuList.length;
+    document.getElementById('prev').disabled = i === 0;
+    document.getElementById('next').disabled = i === kartuList.length - 1;
+    titikList.forEach((t, n) => t.classList.toggle('aktif', n === i));
+
+    try { localStorage.setItem('pelajaran', i); } catch (e) {}
+    history.replaceState(null, '', '#' + (i + 1));
+    if (!tanpaScroll) window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.getElementById('prev').addEventListener('click', () => tampil(sekarang - 1));
+document.getElementById('next').addEventListener('click', () => tampil(sekarang + 1));
+
+/* ---------- Keyboard ---------- */
+document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft')  tampil(sekarang - 1);
+    if (e.key === 'ArrowRight') tampil(sekarang + 1);
+});
+
+/* ---------- Geser di HP ---------- */
+let x0 = 0, y0 = 0, t0 = 0;
+const area = document.getElementById('konten');
+area.addEventListener('touchstart', e => {
+    const t = e.changedTouches[0];
+    x0 = t.clientX; y0 = t.clientY; t0 = Date.now();
+}, { passive: true });
+area.addEventListener('touchend', e => {
+    const t = e.changedTouches[0];
+    const dx = t.clientX - x0, dy = t.clientY - y0;
+    if (Date.now() - t0 > 700) return;                       // bukan swipe cepat
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;  // harus dominan horizontal
+    if (window.getSelection && String(window.getSelection())) return;    // sedang menyeleksi teks
+    tampil(dx < 0 ? sekarang + 1 : sekarang - 1);            // geser kiri = berikutnya
+}, { passive: true });
+
+/* ---------- Muat data ---------- */
 fetch(JSON_URL)
     .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(render)
